@@ -38,28 +38,52 @@ DestinyAPI.prototype.getAccount = function(membershipID, callback) {
   });
 };
 
-DestinyAPI.prototype.getActivity = function(membershipID, callback) {
+DestinyAPI.prototype.getActivity = function(membershipID, count, callback) {
   var self = this;
   this.getAccount(membershipID, function(response) {
     var characters = response.characters;
     var activities = [];
 
     async.each(characters, function(character, async_callback) {
-      self.DestinyHTTPRequest("Stats/ActivityHistory/2/" + membershipID + "/" + character.characterBase.characterId + "/?mode=None", function(response_c) {
+      self.DestinyHTTPRequest("Stats/ActivityHistory/2/" + membershipID + "/" + character.characterBase.characterId + "/?mode=None&count=" + count, function(response_c) {
         var charActivities = response_c.Response.data.activities;
-        // console.log(charActivities);
         activities = activities.concat(charActivities);
-        // console.log(activities);
         async_callback();
       });
     }, function(err) {
       if (err) {
         console.log("Error getting activities for " + membershipID);
       } else {
-        // console.log("DONE");
         callback(activities);
       }
     });
   });
-  // this.DestinyHTTPRequest("/Destiny/Stats/ActivityHistory/2/" + membershipID + "/"{characterId}/
 };
+
+DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
+  var self = this;
+  this.getActivity(membershipID, 5, function(activityList) {
+    var playerMap = {};
+    async.each(activityList, function(activity, async_callback) {
+      self.DestinyHTTPRequest("Stats/PostGameCarnageReport/" + activity.activityDetails.instanceId + "/", function(response_a) {
+        var playerList = response_a.Response.data.entries;
+        // console.log(playerList);
+        playerList.forEach(function(playerEntry) {
+          console.log(playerEntry);
+          var displayName = playerEntry.player.destinyUserInfo.displayName;
+          if (playerMap[displayName] === undefined) {
+            playerMap[displayName] = {count: 0};
+          }
+          playerMap[displayName].count = playerMap[displayName].count + 1;
+        });
+        async_callback();
+      });
+    }, function(err) {
+      if (err) {
+        console.log("Error loading recent players for " + membershipID);
+      } else {
+        callback(playerMap);
+      }
+    })
+  });
+}
