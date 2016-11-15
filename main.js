@@ -1,22 +1,46 @@
 var api = new DestinyAPI("78cba77c96914777b028443feb5ee031");
 
 var playerData = {"nodes": [], "links": []};
-
-api.getMembershipID("lefey10e", function(response) {
-  console.log(response);
-  playerData.nodes.push({"id": response.displayName, "group": 0});
-  api.getRecentPlayers(response.membershipId, function(response2) {
-    console.log(response2);
-    for (var player in response2) {
-      var count = response2[player].count;
-      playerData.nodes.push({"id": player, "group": count});
-      playerData.links.push({"source": response.displayName, "target": player, "value": count});
-    };
-    update(playerData);
-  });
+var playerQueue = new PriorityQueue(function (player1, player2) {
+  return player1.count > player2.count;
 });
 
-d3.interval(function(){ update(playerData); }, 5000);
+function getData(username) {
+  api.getMembershipID(username, function(response) {
+    console.log(response);
+    // playerData.nodes.push({"id": response.displayName, "group": 0});
+    api.getRecentPlayers(response.membershipId, function(response2) {
+      console.log(response2);
+      for (var player in response2) {
+        var count = response2[player].count;
+        if (!containsNode(player)) {
+          playerData.nodes.push({"id": player, "group": count});
+          playerQueue.enqueue({username: player, count: count});
+        }
+        if ((i = indexOfLink(player, response.displayName)) !== -1) {
+          if (count < playerData.links[i].value) {
+            playerData.links[i].value = count;
+          }
+        } else {
+          playerData.links.push({"source": response.displayName, "target": player, "value": count});
+        }
+      };
+      update(playerData);
+    });
+  });
+}
+
+var counter = 4;
+d3.interval(function(){
+  console.log("INTERVAL: " + counter + ", queue length: " + playerQueue.length());
+  if (counter > 0 && playerQueue.length() > 0) {
+    var nextPlayer = playerQueue.dequeue();
+    getData(nextPlayer.username);
+    counter--;
+  }
+
+  // update(playerData);
+}, 5000);
 
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
@@ -25,7 +49,7 @@ var svg = d3.select("svg"),
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
 var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(function(d) { return 100 - 10*d.value; }))
+    .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(function(d) { return 100/d.value; }))
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
@@ -34,6 +58,7 @@ var nodeG = svg.append("g").attr("class", "nodes");
 
 function update(graph) {
     console.log(graph);
+    console.log(playerQueue);
 
     var updateLink = linkG.selectAll("line")
       .data(graph.links);
@@ -96,6 +121,27 @@ function dragended(d) {
   d.fy = null;
 }
 
+getData("lefey10e");
+playerData.nodes.push({"id": "LeFey10e", "group": 0});
+
+
+function containsNode(newNodeID) {
+  for (var i = 0; i < playerData.nodes.length; i++) {
+    if (playerData.nodes[i].id === newNodeID) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function indexOfLink(source, target) {
+  for (var i = 0; i < playerData.links.length; i++) {
+    if (playerData.links[i].source === source && playerData.links[i].target === target) {
+      return i;
+    }
+  }
+  return -1;
+}
 // update(playerData);
 // function update() {
 //   console.log(graph);
