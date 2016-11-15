@@ -69,12 +69,14 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
         var playerList = response_a.Response.data.entries;
         // console.log(playerList);
         playerList.forEach(function(playerEntry) {
-          console.log(playerEntry);
-          var displayName = playerEntry.player.destinyUserInfo.displayName;
-          if (playerMap[displayName] === undefined) {
-            playerMap[displayName] = {count: 0};
+          // console.log(playerEntry);
+          if (playerEntry.player.destinyUserInfo.membershipId !== membershipID){
+            var displayName = playerEntry.player.destinyUserInfo.displayName;
+            if (playerMap[displayName] === undefined) {
+              playerMap[displayName] = {count: 0};
+            }
+            playerMap[displayName].count = playerMap[displayName].count + 1;
           }
-          playerMap[displayName].count = playerMap[displayName].count + 1;
         });
         async_callback();
       });
