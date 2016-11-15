@@ -16,7 +16,7 @@ api.getMembershipID("lefey10e", function(response) {
   });
 });
 
-setInterval(function(){ update(playerData); }, 5000);
+d3.interval(function(){ update(playerData); }, 5000);
 
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
@@ -29,24 +29,20 @@ var simulation = d3.forceSimulation()
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-function update(graph) {
-  // console.log(data);
-  // d3.json(data, function(error, graph) {
-    console.log(graph);
-    // if (error) throw error;
+var linkG = svg.append("g").attr("class", "links");
+var nodeG = svg.append("g").attr("class", "nodes");
 
-    var link = svg.append("g")
-        .attr("class", "links")
-      .selectAll("line")
-      .data(graph.links)
-      .enter().append("line")
+function update(graph) {
+    console.log(graph);
+
+    var updateLink = linkG.selectAll("line")
+      .data(graph.links);
+    var link = updateLink.enter().append("line")
         .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
 
-    var node = svg.append("g")
-        .attr("class", "nodes")
-      .selectAll("circle")
-      .data(graph.nodes)
-      .enter().append("circle")
+    var updateNode = nodeG.selectAll("circle")
+      .data(graph.nodes);
+    var node = updateNode.enter().append("circle")
         .attr("r", 5)
         .attr("fill", function(d) { return color(d.group); })
         .call(d3.drag()
@@ -70,13 +66,13 @@ function update(graph) {
         .links(graph.links);
 
     function ticked() {
-      link
+      link.merge(updateLink)
           .attr("x1", function(d) { return d.source.x; })
           .attr("y1", function(d) { return d.source.y; })
           .attr("x2", function(d) { return d.target.x; })
           .attr("y2", function(d) { return d.target.y; });
 
-      node
+      node.merge(updateNode)
           .attr("cx", function(d) { return d.x; })
           .attr("cy", function(d) { return d.y; });
     }
