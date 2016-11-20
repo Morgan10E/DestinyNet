@@ -84,8 +84,31 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
       if (err) {
         console.log("Error loading recent players for " + membershipID);
       } else {
-        callback(playerMap);
+        var playerList = [];
+        for (player in playerMap) {
+          playerList.push({id:player, value:playerMap[player].count});
+        }
+        callback(playerList);
       }
-    })
+    });
   });
-}
+};
+
+DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
+  var username = userObject.id;
+  api.getMembershipID(username, function(response) {
+    console.log(response);
+    // playerData.nodes.push({"id": response.displayName, "group": 0});
+    api.getRecentPlayers(response.membershipId, function(response2) {
+      console.log(response2);
+      callback(response2);
+    });
+  });
+};
+
+DestinyAPI.prototype.getSingleDataPoint = function(username, callback) {
+  this.getMembershipID("lefey10e", function(response) {
+    console.log(response);
+    callback({id: response.displayName})
+  });
+};
