@@ -86,7 +86,7 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
       } else {
         var playerList = [];
         for (player in playerMap) {
-          playerList.push({id:player, value:playerMap[player].count});
+          playerList.push({id:player, value:playerMap[player].count, data: {Name:player, TimesPlayed: playerMap[player].count}});
         }
         callback(playerList);
       }
@@ -109,6 +109,6 @@ DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
 DestinyAPI.prototype.getSingleDataPoint = function(username, callback) {
   this.getMembershipID("lefey10e", function(response) {
     console.log(response);
-    callback({id: response.displayName})
+    callback({id: response.displayName, data: {Name: response.displayName}})
   });
 };

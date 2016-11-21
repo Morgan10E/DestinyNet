@@ -23,6 +23,10 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
   var width = +this.svg.attr("width"),
   height = +this.svg.attr("height");
 
+  this.div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
   this.simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(function(d) { return 100/d.value; }))
     .force("charge", d3.forceManyBody())
@@ -40,6 +44,19 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
     .on("zoom", function(d) { self.zoomed(d, self); });
 
   this.svg.call(zoom);
+
+  this.tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    var htmlString = "";
+    for (key in d.data) {
+      htmlString = htmlString + "<strong>" + key + ":</strong> " + d.data[key] + "<br>";
+    }
+    return htmlString;//"<strong>Name:</strong> <span style='color:red'>" + d.id + "</span>";
+  });
+
+  this.svg.call(this.tip);
 };
 
 // var api = new DestinyAPI("78cba77c96914777b028443feb5ee031");
@@ -143,9 +160,11 @@ NetworkCrawler.prototype.update = function() {
   var node = updateNode.enter().append("circle")
       .attr("r", 5)
       .call(d3.drag()
-          .on("start", function(d) { self.dragstarted(d, self); })
-          .on("drag", function(d) { self.dragged(d, self); })
-          .on("end", function(d) { self.dragended(d, self); }));
+        .on("start", function(d) { self.dragstarted(d, self); })
+        .on("drag", function(d) { self.dragged(d, self); })
+        .on("end", function(d) { self.dragended(d, self); }))
+      .on('mouseover', self.tip.show)
+      .on('mouseout', self.tip.hide);
 
   node.append("title")
       .text(function(d) { return d.id; });
