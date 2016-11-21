@@ -28,10 +28,18 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-  this.simulation.alphaTarget(0.1).restart();
+  this.simulation.alphaTarget(0.001).restart();
 
-  this.linkG = this.svg.append("g").attr("class", "links");
-  this.nodeG = this.svg.append("g").attr("class", "nodes");
+  this.container = this.svg.append("g");//.attr("position", "absolute").attr("width", "100%").attr("height","100%");
+  this.linkG = this.container.append("g").attr("class", "links");
+  this.nodeG = this.container.append("g").attr("class", "nodes");
+
+  var self = this;
+  var zoom = d3.zoom()
+    .scaleExtent([0.001, 10])
+    .on("zoom", function(d) { self.zoomed(d, self); });
+
+  this.svg.call(zoom);
 };
 
 // var api = new DestinyAPI("78cba77c96914777b028443feb5ee031");
@@ -118,7 +126,7 @@ NetworkCrawler.prototype.run = function(numSteps) {
 };
 
 NetworkCrawler.prototype.update = function() {
-  // var self = this;
+  var self = this;
   var graph = this.vizData;
   console.log(graph);
   console.log(this.priorityQueue);
@@ -135,9 +143,9 @@ NetworkCrawler.prototype.update = function() {
   var node = updateNode.enter().append("circle")
       .attr("r", 5)
       .call(d3.drag()
-          .on("start", this.dragstarted)
-          .on("drag", this.dragged)
-          .on("end", this.dragended));
+          .on("start", function(d) { self.dragstarted(d, self); })
+          .on("drag", function(d) { self.dragged(d, self); })
+          .on("end", function(d) { self.dragended(d, self); }));
 
   node.append("title")
       .text(function(d) { return d.id; });
@@ -166,30 +174,39 @@ NetworkCrawler.prototype.update = function() {
         .attr("cy", function(d) { return d.y; });
   }
 
-  function dragstarted(d) {
-    if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
+  // function dragstarted(d) {
+  //   if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+  //   d.fx = d.x;
+  //   d.fy = d.y;
+  // }
   // });
 };
 
-NetworkCrawler.prototype.dragstarted = function(d) {
-  // if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+NetworkCrawler.prototype.dragstarted = function(d, crawler) {
+  if (!d3.event.active) crawler.simulation.alphaTarget(0.3).restart();
+  // console.log(crawler);
   d.fx = d.x;
   d.fy = d.y;
 };
 
-NetworkCrawler.prototype.dragged = function(d) {
+NetworkCrawler.prototype.dragged = function(d, crawler) {
   d.fx = d3.event.x;
   d.fy = d3.event.y;
 };
 
-NetworkCrawler.prototype.dragended = function(d) {
-  // if (!d3.event.active) this.simulation.alphaTarget(0);
+NetworkCrawler.prototype.dragended = function(d, crawler) {
+  if (!d3.event.active) crawler.simulation.alphaTarget(0.001);
   d.fx = null;
   d.fy = null;
 };
+
+NetworkCrawler.prototype.zoomed = function(d, crawler) {
+  console.log(d3.event);
+  crawler.container.attr("transform", d3.event.transform);
+  // gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+  // gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
+  // crawler.container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
 
 // getData("lefey10e");
 // playerData.nodes.push({"id": "LeFey10e", "group": 0});
