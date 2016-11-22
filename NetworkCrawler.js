@@ -161,33 +161,42 @@ NetworkCrawler.prototype.update = function() {
     .selectAll("circle")
     .data(graph.nodes);
   var node = updateNode.enter().append("circle")
-      .attr("class", function(d) { return "node " + d.id; })
+      .attr("class", "node")
+      .attr("id", function(d) { return d.id; })
       .attr("r", 5)
       .call(d3.drag()
         .on("start", function(d) { self.dragstarted(d, self); })
         .on("drag", function(d) { self.dragged(d, self); })
         .on("end", function(d) { self.dragended(d, self); }))
-      .on('mouseover', self.tip.show)
-      .on('mouseout', self.tip.hide)
-      .on('click', function(d) {
-        console.log("CLICKED " + d.id);
-        self.priorityQueue.remove(function(item) {
-          return item.id == d.id;
-        });
-        self.addNeighbors(d);
-      });
+      .on('mouseover', function(d) {
+        self.tip.show(d);
+        self.priorityList.select("#" + d.id).classed("highlighted", true);
+      })
+      .on('mouseout', function(d) {
+        self.tip.hide(d);
+        self.priorityList.select("#" + d.id).classed("highlighted", false);
+      })
+      .on('click', function(d) { self.clicked(d, self); });
 
   node.append("title")
       .text(function(d) { return d.id; });
 
   var ul = this.priorityList.selectAll(".priorityListItem")
     .data(this.priorityQueue.queue);
-  ul.attr("class", "priorityListItem updated");
+  // ul.attr("class", "priorityListItem updated");
 
   ul.enter()
     .append("div")
-    .attr("class", "priorityListItem new")
+    .attr("class", "priorityListItem")
+    .on('mouseover', function(d) {
+      self.nodeG.select("#" + d.id).attr("fill", "red");
+    })
+    .on('mouseout', function(d) {
+      self.nodeG.select("#" + d.id).attr("fill", "black");
+    })
+    .on('click', function(d) { self.clicked(d, self); })
   .merge(ul)
+    .attr("id", function(d) { return d.id; })
     .html(function(d) { return d.id; })
   ul.exit().remove();
 
@@ -242,7 +251,15 @@ NetworkCrawler.prototype.zoomed = function(d, crawler) {
   // gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
   // gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
   // crawler.container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-}
+};
+
+NetworkCrawler.prototype.clicked = function(d, crawler) {
+  console.log("CLICKED " + d.id);
+  crawler.priorityQueue.remove(function(item) {
+    return item.id == d.id;
+  });
+  crawler.addNeighbors(d);
+};
 
 // getData("lefey10e");
 // playerData.nodes.push({"id": "LeFey10e", "group": 0});

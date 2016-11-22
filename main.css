@@ -37,18 +37,25 @@
 #priorityList {
   display: flex;
   flex-direction: column;
+  border: 5px solid gray;
+  padding: 5px;
 }
 
 .priorityListItem {
   text-align: center;
-  background: #ddddff;
+  background: white;
   width: 100%;
   margin: 5px;
   padding: 5px;
 }
 
-.priorityListItem.new {
-  background: #ddffdd;
+.priorityListItem:hover {
+  background: red;
+  cursor: pointer;
+}
+
+.priorityListItem.highlighted {
+  background: red;
 }
 
 .priorityListItem.updated {
