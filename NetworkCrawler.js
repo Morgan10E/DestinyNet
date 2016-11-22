@@ -168,7 +168,14 @@ NetworkCrawler.prototype.update = function() {
         .on("drag", function(d) { self.dragged(d, self); })
         .on("end", function(d) { self.dragended(d, self); }))
       .on('mouseover', self.tip.show)
-      .on('mouseout', self.tip.hide);
+      .on('mouseout', self.tip.hide)
+      .on('click', function(d) {
+        console.log("CLICKED " + d.id);
+        self.priorityQueue.remove(function(item) {
+          return item.id == d.id;
+        });
+        self.addNeighbors(d);
+      });
 
   node.append("title")
       .text(function(d) { return d.id; });

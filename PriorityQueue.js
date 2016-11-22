@@ -34,3 +34,11 @@ PriorityQueue.prototype.filter = function(filterFunc) { //if filterFunc(item) ==
   }
   this.queue = newQueue;
 };
+
+PriorityQueue.prototype.remove = function(filterFunc) { //if filterFunc(item) == true, remove the item -> only removes the first item found
+  for (var i = 0; i < this.queue.length; i++) {
+    if (filterFunc(this.queue[i])) {
+      this.queue.splice(i, 1);
+    }
+  }
+}
