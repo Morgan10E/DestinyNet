@@ -97,10 +97,10 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
 DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
   var username = userObject.id;
   api.getMembershipID(username, function(response) {
-    console.log(response);
+    // console.log(response);
     // playerData.nodes.push({"id": response.displayName, "group": 0});
     api.getRecentPlayers(response.membershipId, function(response2) {
-      console.log(response2);
+      // console.log(response2);
       callback(response2);
     });
   });

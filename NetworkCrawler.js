@@ -27,6 +27,8 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+  this.priorityList = d3.select("#priorityList");
+
   this.simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }).distance(function(d) { return 100/d.value; }))
     .force("charge", d3.forceManyBody())
@@ -126,6 +128,7 @@ NetworkCrawler.prototype.setStartNode = function(startNode) {
 }
 
 NetworkCrawler.prototype.run = function(numSteps) {
+  this.update();
   var counter = numSteps;
   var self = this;
   var interval = setInterval(function(){
@@ -145,8 +148,8 @@ NetworkCrawler.prototype.run = function(numSteps) {
 NetworkCrawler.prototype.update = function() {
   var self = this;
   var graph = this.vizData;
-  console.log(graph);
-  console.log(this.priorityQueue);
+  // console.log(graph);
+  // console.log(this.priorityQueue);
 
   var updateLink = this.linkG
     .selectAll("line")
@@ -158,6 +161,7 @@ NetworkCrawler.prototype.update = function() {
     .selectAll("circle")
     .data(graph.nodes);
   var node = updateNode.enter().append("circle")
+      .attr("class", function(d) { return "node " + d.id; })
       .attr("r", 5)
       .call(d3.drag()
         .on("start", function(d) { self.dragstarted(d, self); })
@@ -169,10 +173,16 @@ NetworkCrawler.prototype.update = function() {
   node.append("title")
       .text(function(d) { return d.id; });
 
-  node.append("text")
-    .attr("dx", 12)
-    .attr("dy", ".35em")
-    .text(function(d) { return d.id });
+  var ul = this.priorityList.selectAll(".priorityListItem")
+    .data(this.priorityQueue.queue);
+  ul.attr("class", "priorityListItem updated");
+
+  ul.enter()
+    .append("div")
+    .attr("class", "priorityListItem new")
+  .merge(ul)
+    .html(function(d) { return d.id; })
+  ul.exit().remove();
 
   this.simulation
       .nodes(graph.nodes)
