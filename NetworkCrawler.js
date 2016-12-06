@@ -59,6 +59,7 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
   });
 
   this.svg.call(this.tip);
+  // this.priorityList.call(this.tip);
 };
 
 // var api = new DestinyAPI("78cba77c96914777b028443feb5ee031");
@@ -66,13 +67,29 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
 NetworkCrawler.prototype.addNeighbors = function(originNode) {
   var self = this;
   this.neighborRetriever(originNode, function(response) {
+    // async.each(response, function(nodeObject, async_callback) {
+    //   if (!self.containsNode(nodeObject)) {
+    //     self.vizData.nodes.push(nodeObject);
+    //     self.priorityQueue.enqueue(nodeObject);
+    //   }
+    //   if ((i = self.indexOfLink(nodeObject.id, originNode.id)) !== -1) {
+    //     if (nodeObject.value > self.vizData.links[i].value) {
+    //       self.vizData.links[i].value = nodeObject.value;
+    //     }
+    //   } else {
+    //     self.vizData.links.push({"source": originNode.id, "target": nodeObject.id, "value": nodeObject.value});
+    //   }
+    //   self.addConnectionsBetweenNeighbors(nodeObject, self, function() { self.update(); });
+    // }, function(err) {
+    //   self.update();
+    // });
     response.forEach(function(nodeObject) {
       if (!self.containsNode(nodeObject)) {
         self.vizData.nodes.push(nodeObject);
         self.priorityQueue.enqueue(nodeObject);
       }
       if ((i = self.indexOfLink(nodeObject.id, originNode.id)) !== -1) {
-        if (nodeObject.value < self.vizData.links[i].value) {
+        if (nodeObject.value > self.vizData.links[i].value) {
           self.vizData.links[i].value = nodeObject.value;
         }
       } else {
@@ -81,7 +98,32 @@ NetworkCrawler.prototype.addNeighbors = function(originNode) {
     });
 
     self.update();
+
+    self.addConnectionsBetweenNeighbors(response, self);
   });
+};
+
+NetworkCrawler.prototype.addConnectionsBetweenNeighbors = function(newNeighbors, self) {
+  async.each(newNeighbors, function(neighbor, async_callback) {
+    self.neighborRetriever(neighbor, function(response) {
+      response.forEach(function(nodeObject) {
+        if (self.containsNode(nodeObject)) {
+          if ((i = self.indexOfLink(nodeObject.id, neighbor.id)) !== -1) {
+            if (nodeObject.value > self.vizData.links[i].value) {
+              self.vizData.links[i].value = nodeObject.value;
+            }
+          } else {
+            self.vizData.links.push({"source": neighbor.id, "target": nodeObject.id, "value": nodeObject.value});
+          }
+        }
+      });
+      self.update();
+      async_callback();
+    });
+  }, function(err) {
+    console.log("Finished adding links for " + neighbor.id);
+  });
+
 };
 
 // function getData(query) {
@@ -170,6 +212,7 @@ NetworkCrawler.prototype.update = function() {
         .on("end", function(d) { self.dragended(d, self); }))
       .on('mouseover', function(d) {
         self.tip.show(d);
+        console.log(d);
         self.priorityList.select("#" + d.id).classed("highlighted", true);
       })
       .on('mouseout', function(d) {
@@ -189,15 +232,18 @@ NetworkCrawler.prototype.update = function() {
     .append("div")
     .attr("class", "priorityListItem")
     .on('mouseover', function(d) {
-      self.nodeG.select("#" + d.id).attr("fill", "red");
+      var highlightedNode = self.nodeG.select("#" + d.id).transition().attr("fill", "red");
+      // console.log(d);
+      // self.tip.show(d, highlightedNode);
     })
     .on('mouseout', function(d) {
-      self.nodeG.select("#" + d.id).attr("fill", "black");
+      var highlightedNode = self.nodeG.select("#" + d.id).transition().delay(1000).duration(5000).attr("fill", "black");
+      // self.tip.hide(d);
     })
     .on('click', function(d) { self.clicked(d, self); })
   .merge(ul)
     .attr("id", function(d) { return d.id; })
-    .html(function(d) { return d.id; })
+    .html(function(d, i) { return (i+1) + ". " + d.id; })
   ul.exit().remove();
 
   this.simulation

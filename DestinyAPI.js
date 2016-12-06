@@ -9,7 +9,7 @@ DestinyAPI.prototype.DestinyHTTPRequest = function(url, callback) {
     if (this.readyState == 4 && this.status == 200) {
       var results = JSON.parse(this.responseText);
       if (results.ErrorCode == 1) {
-        console.log("SUCCESSFUL REQUEST");
+        // console.log("SUCCESSFUL REQUEST");
         callback(results);
       } else {
         console.log("THERE WAS AN ERROR WITH REQUEST: " + url);
@@ -17,7 +17,7 @@ DestinyAPI.prototype.DestinyHTTPRequest = function(url, callback) {
         console.log(results.ErrorStatus);
       }
     } else {
-      console.log("REQUEST NOT COMPLETED: " + url);
+      // console.log("REQUEST NOT COMPLETED: " + url);
     }
   }
 
@@ -60,7 +60,7 @@ DestinyAPI.prototype.getActivity = function(membershipID, count, callback) {
   });
 };
 
-DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
+DestinyAPI.prototype.getRecentPlayers = function(membershipID, curVal, callback) {
   var self = this;
   this.getActivity(membershipID, 5, function(activityList) {
     var playerMap = {};
@@ -73,7 +73,7 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
           if (playerEntry.player.destinyUserInfo.membershipId !== membershipID){
             var displayName = playerEntry.player.destinyUserInfo.displayName;
             if (playerMap[displayName] === undefined) {
-              playerMap[displayName] = {count: 0};
+              playerMap[displayName] = {count: curVal};
             }
             playerMap[displayName].count = playerMap[displayName].count + 1;
           }
@@ -96,10 +96,11 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, callback) {
 
 DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
   var username = userObject.id;
+  var curVal = userObject.value;
   api.getMembershipID(username, function(response) {
     // console.log(response);
     // playerData.nodes.push({"id": response.displayName, "group": 0});
-    api.getRecentPlayers(response.membershipId, function(response2) {
+    api.getRecentPlayers(response.membershipId, curVal, function(response2) {
       // console.log(response2);
       callback(response2);
     });
@@ -108,7 +109,7 @@ DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
 
 DestinyAPI.prototype.getSingleDataPoint = function(username, callback) {
   this.getMembershipID("lefey10e", function(response) {
-    console.log(response);
+    // console.log(response);
     callback({id: response.displayName, data: {Name: response.displayName}})
   });
 };

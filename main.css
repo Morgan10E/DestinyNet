@@ -34,19 +34,41 @@
   pointer-events: none;
 }
 
+/*.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}*/
+
+#window {
+  border: 5px solid gray;
+  display:flex;
+}
+
 #priorityList {
-  display: flex;
-  flex-direction: column;
+  /*display: flex;
+  flex-direction: column;*/
   border: 5px solid gray;
   padding: 5px;
+  overflow: scroll;
+  height: 600px;
+  /*width: 200px;*/
+  flex-grow: 1;
 }
 
 .priorityListItem {
-  text-align: center;
+  /*text-align: center;*/
   background: white;
-  width: 100%;
-  margin: 5px;
+  width: inherit;
+  /*margin: 5px;*/
   padding: 5px;
+  overflow: scroll;
 }
 
 .priorityListItem:hover {
