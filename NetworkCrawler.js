@@ -66,6 +66,8 @@ var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priority
 
 NetworkCrawler.prototype.addNeighbors = function(originNode) {
   var self = this;
+  originNode['searched'] = 1;
+  self.update();
   this.neighborRetriever(originNode, function(response) {
     // async.each(response, function(nodeObject, async_callback) {
     //   if (!self.containsNode(nodeObject)) {
@@ -85,6 +87,7 @@ NetworkCrawler.prototype.addNeighbors = function(originNode) {
     // });
     response.forEach(function(nodeObject) {
       if (!self.containsNode(nodeObject)) {
+        nodeObject['searched'] = 0;
         self.vizData.nodes.push(nodeObject);
         self.priorityQueue.enqueue(nodeObject);
       }
@@ -99,11 +102,11 @@ NetworkCrawler.prototype.addNeighbors = function(originNode) {
 
     self.update();
 
-    self.addConnectionsBetweenNeighbors(response, self);
+    self.addConnectionsBetweenNeighbors(response, self, originNode);
   });
 };
 
-NetworkCrawler.prototype.addConnectionsBetweenNeighbors = function(newNeighbors, self) {
+NetworkCrawler.prototype.addConnectionsBetweenNeighbors = function(newNeighbors, self, originNode) {
   async.each(newNeighbors, function(neighbor, async_callback) {
     self.neighborRetriever(neighbor, function(response) {
       response.forEach(function(nodeObject) {
@@ -121,7 +124,8 @@ NetworkCrawler.prototype.addConnectionsBetweenNeighbors = function(newNeighbors,
       async_callback();
     });
   }, function(err) {
-    console.log("Finished adding links for " + neighbor.id);
+    originNode['searched'] = 2;
+    self.update();
   });
 
 };
@@ -219,7 +223,16 @@ NetworkCrawler.prototype.update = function() {
         self.tip.hide(d);
         self.priorityList.select("#" + d.id).classed("highlighted", false);
       })
-      .on('click', function(d) { self.clicked(d, self); });
+      .on('click', function(d) { self.clicked(d, self); })
+    .merge(updateNode)
+      .attr('fill', function(d) {
+        if (d.searched == 1) {
+          return 'green';
+        }
+        if (d.searched == 2) {
+          return 'blue';
+        }
+      });
 
   node.append("title")
       .text(function(d) { return d.id; });
