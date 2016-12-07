@@ -12,6 +12,8 @@ Priority Comparison: used by the priority queue to determine search order
     two node objects (the data they contain will have at least 'id', otherwise defined by user)
 */
 
+//Make visualization customizable? Do something to make the visualization more novel
+
 var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priorityComparisonFunc) {
   this.dataRetriever = dataRetrievalFunc;
   this.neighborRetriever = neighborRetrieverFunc;
