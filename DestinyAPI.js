@@ -73,7 +73,7 @@ DestinyAPI.prototype.getRecentPlayers = function(membershipID, curVal, callback)
           if (playerEntry.player.destinyUserInfo.membershipId !== membershipID){
             var displayName = playerEntry.player.destinyUserInfo.displayName;
             if (playerMap[displayName] === undefined) {
-              playerMap[displayName] = {count: curVal};
+              playerMap[displayName] = {count: 0};
             }
             playerMap[displayName].count = playerMap[displayName].count + 1;
           }

@@ -14,8 +14,7 @@ Priority Comparison: used by the priority queue to determine search order
 
 //Make visualization customizable? Do something to make the visualization more novel
 
-var NetworkCrawler = function(dataRetrievalFunc, neighborRetrieverFunc, priorityComparisonFunc) {
-  this.dataRetriever = dataRetrievalFunc;
+var NetworkCrawler = function(neighborRetrieverFunc, priorityComparisonFunc) {
   this.neighborRetriever = neighborRetrieverFunc;
   this.priorityQueue = new PriorityQueue(priorityComparisonFunc);
   this.vizData = {"nodes": [], "links": []};
@@ -89,6 +88,7 @@ NetworkCrawler.prototype.addNeighbors = function(originNode) {
     // });
     response.forEach(function(nodeObject) {
       if (!self.containsNode(nodeObject)) {
+        console.log(nodeObject.id);
         nodeObject['searched'] = 0;
         self.vizData.nodes.push(nodeObject);
         self.priorityQueue.enqueue(nodeObject);
@@ -117,7 +117,7 @@ NetworkCrawler.prototype.addConnectionsBetweenNeighbors = function(newNeighbors,
             if (nodeObject.value > self.vizData.links[i].value) {
               self.vizData.links[i].value = nodeObject.value;
             }
-          } else {
+          } else if (self.indexOfLink(neighbor.id, nodeObject.id) === -1) {
             self.vizData.links.push({"source": neighbor.id, "target": nodeObject.id, "value": nodeObject.value});
           }
         }
@@ -160,15 +160,15 @@ NetworkCrawler.prototype.addConnectionsBetweenNeighbors = function(newNeighbors,
   // });
 // }
 
-NetworkCrawler.prototype.setStartQuery = function(query, callback) {
-  var self = this;
-  this.dataRetriever(query, function(startNode) {
-    // var startNode = self.dataExtractor(response);
-    self.vizData.nodes.push(startNode);
-    self.priorityQueue.enqueue(startNode);
-    callback(startNode);
-  });
-};
+// NetworkCrawler.prototype.setStartQuery = function(query, callback) {
+//   var self = this;
+//   this.dataRetriever(query, function(startNode) {
+//     // var startNode = self.dataExtractor(response);
+//     self.vizData.nodes.push(startNode);
+//     self.priorityQueue.enqueue(startNode);
+//     callback(startNode);
+//   });
+// };
 
 NetworkCrawler.prototype.setStartNode = function(startNode) {
   this.vizData.nodes.push(startNode);
