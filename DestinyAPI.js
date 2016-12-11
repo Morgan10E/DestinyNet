@@ -5,11 +5,9 @@ var DestinyAPI = function(apiKey, platform) {
 DestinyAPI.prototype.DestinyHTTPRequest = function(url, callback) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
-    // console.log(this);
     if (this.readyState == 4 && this.status == 200) {
       var results = JSON.parse(this.responseText);
       if (results.ErrorCode == 1) {
-        // console.log("SUCCESSFUL REQUEST");
         callback(results);
       } else {
         console.log("THERE WAS AN ERROR WITH REQUEST: " + url);
@@ -17,7 +15,6 @@ DestinyAPI.prototype.DestinyHTTPRequest = function(url, callback) {
         console.log(results.ErrorStatus);
       }
     } else {
-      // console.log("REQUEST NOT COMPLETED: " + url);
     }
   }
 
@@ -98,10 +95,7 @@ DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
   var username = userObject.id;
   var curVal = userObject.value;
   api.getMembershipID(username, function(response) {
-    // console.log(response);
-    // playerData.nodes.push({"id": response.displayName, "group": 0});
     api.getRecentPlayers(response.membershipId, curVal, function(response2) {
-      // console.log(response2);
       callback(response2);
     });
   });
@@ -109,7 +103,6 @@ DestinyAPI.prototype.getNeighbors = function(userObject, callback) {
 
 DestinyAPI.prototype.getSingleDataPoint = function(username, callback) {
   this.getMembershipID("lefey10e", function(response) {
-    // console.log(response);
     callback({id: response.displayName, data: {Name: response.displayName}})
   });
 };

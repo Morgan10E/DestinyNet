@@ -248,12 +248,11 @@ NetworkCrawler.prototype.update = function() {
     .attr("class", "priorityListItem")
     .on('mouseover', function(d) {
       var highlightedNode = self.nodeG.select("#" + d.id).transition().attr("fill", "red");
-      // console.log(d);
-      // self.tip.show(d, highlightedNode);
+      self.priorityList.select("#" + d.id).classed("highlighted", true);
     })
     .on('mouseout', function(d) {
       var highlightedNode = self.nodeG.select("#" + d.id).transition().delay(1000).duration(5000).attr("fill", "black");
-      // self.tip.hide(d);
+      self.priorityList.select("#" + d.id).classed("highlighted", false);
     })
     .on('click', function(d) { self.clicked(d, self); })
   .merge(ul)
@@ -279,18 +278,10 @@ NetworkCrawler.prototype.update = function() {
         .attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
   }
-
-  // function dragstarted(d) {
-  //   if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
-  //   d.fx = d.x;
-  //   d.fy = d.y;
-  // }
-  // });
 };
 
 NetworkCrawler.prototype.dragstarted = function(d, crawler) {
   if (!d3.event.active) crawler.simulation.alphaTarget(0.3).restart();
-  // console.log(crawler);
   d.fx = d.x;
   d.fy = d.y;
 };
@@ -309,9 +300,6 @@ NetworkCrawler.prototype.dragended = function(d, crawler) {
 NetworkCrawler.prototype.zoomed = function(d, crawler) {
   console.log(d3.event);
   crawler.container.attr("transform", d3.event.transform);
-  // gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
-  // gY.call(yAxis.scale(d3.event.transform.rescaleY(y)));
-  // crawler.container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 };
 
 NetworkCrawler.prototype.clicked = function(d, crawler) {
@@ -321,10 +309,6 @@ NetworkCrawler.prototype.clicked = function(d, crawler) {
   });
   crawler.addNeighbors(d);
 };
-
-// getData("lefey10e");
-// playerData.nodes.push({"id": "LeFey10e", "group": 0});
-
 
 NetworkCrawler.prototype.containsNode = function(newNode) {
   for (var i = 0; i < this.vizData.nodes.length; i++) {
@@ -343,9 +327,3 @@ NetworkCrawler.prototype.indexOfLink = function(source, target) {
   }
   return -1;
 };
-// update(playerData);
-// function update() {
-//   console.log(graph);
-//   var nodes = g.selectAll("nodes").data(graph.nodes);
-//   var links = g.selectAll("links").data(graph.links);
-// }
