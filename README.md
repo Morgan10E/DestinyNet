@@ -18,9 +18,10 @@ crawler.setStartNode(startNode);
 crawler.run(numberIterations);
 ```
 Where neighborRetrievalFunction and priorityComparisonFunction are user-defined functions that tap into the custom API written by the user.
-..* neighborRetrievalFunction must accept two parameters: first, the node object whose neighbors are being retrieved; second, a callback function that is called with the array of neighbors as its parameter - this is how the network crawler receives the request.
 
-..* priorityComparisonFunction must accept two parameters, which we will call nodeA and nodeB. priorityComparisonFunction returns true if nodeA should have higher priority for exploration than nodeB.
+⋅⋅* neighborRetrievalFunction must accept two parameters: first, the node object whose neighbors are being retrieved; second, a callback function that is called with the array of neighbors as its parameter - this is how the network crawler receives the request.
+
+⋅⋅* priorityComparisonFunction must accept two parameters, which we will call nodeA and nodeB. priorityComparisonFunction returns true if nodeA should have higher priority for exploration than nodeB.
 
 3. Set the start node. Give the crawler a node object to use as a starting point.
 
